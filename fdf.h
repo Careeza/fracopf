@@ -18,10 +18,13 @@
 # include <sys/stat.h>
 # include <fcntl.h>
 # include <stdio.h>
-# include <mlx.h>
+# include "include/mlx.h"
+# include <stddef.h>
+# include <complex.h>
+# include "include/mlx_int.h"
 
 # define KEY_LESS 78
-# define KEY_PLUS 69
+# define KEY_PLUS 44
 # define KEY_UP 125
 # define KEY_DOWN 126
 # define KEY_LEFT 123
@@ -31,6 +34,8 @@
 # define KEY_NUM3 85
 # define SCREEN_X 1000
 # define SCREEN_Y 1000
+
+typedef _Complex double	t_complex;
 
 typedef struct	s_data
 {
@@ -49,11 +54,13 @@ typedef struct	s_data
 	int		more;
 	int		less;
 
-	int		zoom;
-	int		position_y;
-	int		position_x;
+	double	zoom;
+	double	position_y;
+	double	position_x;
 	int		hauteur;
 	int		isoparr;
+	int		frac;
+	t_complex julia;
 
 	int i;
 	int x;
@@ -62,6 +69,7 @@ typedef struct	s_data
 	int ystart;
 	int zstart;
 	double grad;
+	int		iter;
 }				t_data;
 
 int				get_z_max(t_data *fdf);
@@ -70,3 +78,5 @@ int				data(t_data *fdf);
 int				algo(t_data *fdf, int x, int y);
 
 #endif
+
+

@@ -22,14 +22,14 @@ LIB = libft/libft.a
 
 LIB2 = -L/usr/local/lib
 
-LIBX = -lmlx -framework OpenGL -framework AppKit
+LIBX = -framework OpenGL -framework AppKit
 
 INC = -I./libft/ -I/usr/local/include
 
 all: $(NAME)
 
 $(NAME): $(OBJ) $(LIB)
-		gcc $(FLAG) $(LIB) $(LIB2) $(INC) $(OBJ) $(LIBX) -o $(NAME)
+		gcc $(FLAG) $(LIB) -L ./lib -lmlx  $(LIB2) $(INC) $(OBJ) $(LIBX) -o $(NAME)
 
 $(LIB):
 		make -C libft/ fclean

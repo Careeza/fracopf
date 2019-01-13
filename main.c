@@ -13,74 +13,126 @@
 #include "libft.h"
 #include "fdf.h"
 
-static int	ft_div(t_data *fdf, int j)
+static int	ft_div2(t_complex z, int iter, t_complex c)
 {
-	float	c[2];
-	float	z[2];
-	float	tmp;
-	float	res;
+	int			i;
 
-	z[0] = 0;
-	z[1] = 0;
-	res = 0;
-	fdf->i = 0;
-	c[0] = (j % SCREEN_X) / (float)200 - 2.5;
-	c[1] = (j / SCREEN_X) / (float)200 - 2.5;
-	while (fdf->i < 100 && res < 10000)
+	i = 0;
+	while (i < iter && cabs(z) <= 2)
 	{
-		tmp = z[0];
-		z[0] = z[0] * z[0] - z[1] * z[1] + c[0];
-		z[1] = 2 * tmp * z[1] + c[1];
-		res = sqrt(z[0] * z[0] + z[1] * z[1]);
-		fdf->i++;
+		z = z * z + c;
+		i++;
 	}
-	return (res);
+	return (i);
 }
 
-void	ft_color(t_data *fdf, int j)
+static int	ft_div(t_complex c, int iter)
+{
+	t_complex	z;
+	int			i;
+
+	i = 0;
+	z = 0;
+	while (i < iter && cabs(z) <= 2)
+	{
+		z = z * z + c;
+		i++;
+	}
+	return (i);
+}
+
+static int	ft_algo(t_data *fdf)
+{
+	int		x;
+	int		y;
+	int		res;
+
+	y = 0;
+	while (y < SCREEN_Y)
+	{
+		x = 0;
+		while (x < SCREEN_X)
+		{
+			if (fdf->frac == 1)
+				res = (ft_div((x/(double)fdf->zoom - (SCREEN_X / (double)(fdf->zoom * 2)) + fdf->position_x) + ((y / (double)fdf->zoom - (SCREEN_Y / (double)(fdf->zoom * 2)) + fdf->position_y) * I), fdf->iter));
+			else
+				res = (ft_div2((x/(double)fdf->zoom - (SCREEN_X / (double)(fdf->zoom * 2)) + fdf->position_x) + ((y / (double)fdf->zoom - (SCREEN_Y / (double)(fdf->zoom * 2)) + fdf->position_y) * I), fdf->iter, fdf->julia));
+			fdf->img_ptr[y * SCREEN_X + x] = ((1.5 * res * 0xFFFFFF) / fdf->iter);
+			x++;
+		}
+		y++;
+	}
+	fdf->img_ptr[100*500+500] = 0x0;
+	mlx_put_image_to_window(fdf->mlx, fdf->win, fdf->img, 0, 0);
+	return (0);
+}
+/*
+static int	ft_div(t_data *fdf, int j)
+{
+	int			i;
+	t_complex	z;
+	t_complex	c;
+
+	z = 0;
+	i = 0;
+	c = (j % SCREEN_X) / (double)fdf->zoom - 2.5 + (fdf->position_x);
+	c += ((j / SCREEN_X) / (double)fdf->zoom - 2.5 + fdf->position_y) * I;
+	while (i < 50 && cabs(z) <= 2)
+	{
+		z = z * z + c;
+		i++;
+	}
+	return (i);
+}
+
+void	ft_color(t_data *fdf, int j, int i)
 {
 	int color;
-	float percent;
+	double percent;
 
-	color = 0xFF7F24;
-	percent = fdf->i / (float)100;
-	color = color * percent + 0x0000FF;
+	color = 0xFFFFFF;
+	percent = i / (double)100;
+	color = color * percent;
 	fdf->img_ptr[j] = color;
 }
 
 static int	ft_algo(t_data *fdf)
 {
 	int		j;
-	float	res;
+	double	res;
 
 	j = 0;
-	while (j < SCREEN_Y * SCREEN_X)
+	while (j < 1000000)
 	{
 		res = ft_div(fdf, j);
-		if (res <= 1000)
+		if (res >= 99)
+		{
 			fdf->img_ptr[j] = 0x0;
+		}
 		else
-			ft_color(fdf, j);
+		{
+			ft_color(fdf, j, res);
+		}
 		j++;
 	}
-	mlx_put_image_to_window(fdf->mlx, fdf->win, fdf->img, 0, 0);
 	return (0);
 }
-
+*/
 static int	deal_key(int key, t_data *fdf)
 {
+	printf("%d--key\n", key);
 	if (key == KEY_LESS)
-		fdf->zoom -= 5;
+		fdf->zoom -= 25;
 	if (key == KEY_PLUS)
-		fdf->zoom += 5;
+		fdf->iter++;
 	if (key == KEY_UP)
-		fdf->position_y += 15;
+		fdf->position_y += (20 / fdf->zoom);
 	if (key == KEY_DOWN)
-		fdf->position_y -= 15;
+		fdf->position_y -= (20 / fdf->zoom);
 	if (key == KEY_RIGHT)
-		fdf->position_x += 15;
+		fdf->position_x += (20 / fdf->zoom);
 	if (key == KEY_LEFT)
-		fdf->position_x -= 15;
+		fdf->position_x -= (20 / fdf->zoom);
 	if (key == KEY_SPACE)
 		exit (0);
 	mlx_destroy_image(fdf->mlx, fdf->img);
@@ -90,14 +142,44 @@ static int	deal_key(int key, t_data *fdf)
 	return (0);
 }
 
+static int	funct(int x, int y, t_data *fdf)
+{
+	fdf->julia = x / 200.0  - 2.5 + ((y / 200.0 - 2.5) * I);
+	printf("TEST\n");
+	ft_algo(fdf);
+	return (0);
+}
+
+static int	mouse_hook(int button, int x, int y, t_data *fdf)
+{
+	printf("button = %d, x = %d, y = %d\n", button, x, y);
+	printf("z = %f+i%f\n",creal(fdf->julia),cimag(fdf->julia));
+	if (button == 1)
+		fdf->zoom = fdf->zoom * 2;
+	if (button == 2)
+		fdf->zoom = fdf->zoom * 0.5;
+	if (button == 4)
+		fdf->position_y += 0.03;
+	if (button == 5)
+		fdf->position_y -= 0.03;
+	if (button == 6)
+		fdf->position_x += 0.03;
+	if (button == 7)
+		fdf->position_x -= 0.03;
+	deal_key(0, fdf);
+	return (0);
+}
+
 static void	ft_init(t_data *fdf)
 {
-	fdf->zoom = 53;
-	fdf->position_x = SCREEN_X / 4;
-	fdf->position_y = SCREEN_Y / 4;
+	fdf->zoom = 200;
+	fdf->julia = 0;
+	fdf->position_x = 0;
+	fdf->position_y = 0;
 	fdf->hauteur = 1;
 	fdf->more = 0;
 	fdf->less = 0;
+	fdf->iter = 50;
 }
 
 int			main(int argc, char **argv)
@@ -107,7 +189,12 @@ int			main(int argc, char **argv)
 
 	i = 5;
 	(void)argc;
-	(void)argv;
+	if (argv[1][0] == '1')
+		fdf.frac = 1;
+	else
+	{
+		fdf.frac = 2;
+	}
 	ft_init(&fdf);
 	fdf.mlx = mlx_init();
 	fdf.win = mlx_new_window(fdf.mlx, SCREEN_X, SCREEN_Y, "prastoin's fdf");
@@ -115,6 +202,8 @@ int			main(int argc, char **argv)
 	fdf.img_ptr = (int *)mlx_get_data_addr(fdf.img, &i, &i, &i);
 	ft_algo(&fdf);
 	mlx_key_hook(fdf.win, deal_key, &fdf);
+	mlx_mouse_hook(fdf.win, mouse_hook, &fdf);
+	mlx_hook(fdf.win, MotionNotify, PointerMotionMask, funct, &fdf);
 	mlx_loop(fdf.mlx);
 	return (0);
 }
