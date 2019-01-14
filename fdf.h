@@ -21,7 +21,6 @@
 # include "include/mlx.h"
 # include <stddef.h>
 # include <complex.h>
-# include "include/mlx_int.h"
 
 # define KEY_LESS 78
 # define KEY_PLUS 44
@@ -61,6 +60,7 @@ typedef struct	s_data
 	int		isoparr;
 	int		frac;
 	t_complex julia;
+	int			lock;
 
 	int i;
 	int x;

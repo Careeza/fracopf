@@ -13,6 +13,21 @@
 #include "libft.h"
 #include "fdf.h"
 
+static int	ft_div3(t_complex c, int iter)
+{
+	t_complex	z;
+	int			i;
+
+	i = 0;
+	z = 0;
+	while (i < iter && cabs(z) <= 2)
+	{
+		z = ccos(z / c);
+		i++;
+	}
+	return (i);
+}
+
 static int	ft_div2(t_complex z, int iter, t_complex c)
 {
 	int			i;
@@ -55,17 +70,28 @@ static int	ft_algo(t_data *fdf)
 		{
 			if (fdf->frac == 1)
 				res = (ft_div((x/(double)fdf->zoom - (SCREEN_X / (double)(fdf->zoom * 2)) + fdf->position_x) + ((y / (double)fdf->zoom - (SCREEN_Y / (double)(fdf->zoom * 2)) + fdf->position_y) * I), fdf->iter));
-			else
+			if (fdf->frac == 2)
 				res = (ft_div2((x/(double)fdf->zoom - (SCREEN_X / (double)(fdf->zoom * 2)) + fdf->position_x) + ((y / (double)fdf->zoom - (SCREEN_Y / (double)(fdf->zoom * 2)) + fdf->position_y) * I), fdf->iter, fdf->julia));
+			if (fdf->frac == 3)
+				res = (ft_div3((x/(double)fdf->zoom - (SCREEN_X / (double)(fdf->zoom * 2)) + fdf->position_x) + ((y / (double)fdf->zoom - (SCREEN_Y / (double)(fdf->zoom * 2)) + fdf->position_y) * I), fdf->iter));
 			fdf->img_ptr[y * SCREEN_X + x] = ((1.5 * res * 0xFFFFFF) / fdf->iter);
 			x++;
 		}
 		y++;
 	}
-	fdf->img_ptr[100*500+500] = 0x0;
+	fdf->img_ptr[1000*500+500] = 0xFF;
+	fdf->img_ptr[1000*500+501] = 0xFF;
+	fdf->img_ptr[1000*500+499] = 0xFF;
+	fdf->img_ptr[1000*499+500] = 0xFF;
+	fdf->img_ptr[1000*499+501] = 0xFF;
+	fdf->img_ptr[1000*499+499] = 0xFF;
+	fdf->img_ptr[1000*501+500] = 0xFF;
+	fdf->img_ptr[1000*501+501] = 0xFF;
+	fdf->img_ptr[1000*501+499] = 0xFF;
 	mlx_put_image_to_window(fdf->mlx, fdf->win, fdf->img, 0, 0);
 	return (0);
 }
+
 /*
 static int	ft_div(t_data *fdf, int j)
 {
@@ -125,6 +151,8 @@ static int	deal_key(int key, t_data *fdf)
 		fdf->zoom -= 25;
 	if (key == KEY_PLUS)
 		fdf->iter++;
+	if (key == 49)
+		fdf->lock = fdf->lock == 0 ? 1 : 0;
 	if (key == KEY_UP)
 		fdf->position_y += (20 / fdf->zoom);
 	if (key == KEY_DOWN)
@@ -144,9 +172,12 @@ static int	deal_key(int key, t_data *fdf)
 
 static int	funct(int x, int y, t_data *fdf)
 {
-	fdf->julia = x / 200.0  - 2.5 + ((y / 200.0 - 2.5) * I);
-	printf("TEST\n");
-	ft_algo(fdf);
+	if (fdf->lock == 0)
+	{
+		printf("x = %d--y = %d\n", x, y);
+		fdf->julia = x / 200.0  - 2.5 + ((y / 200.0 - 2.5) * I);
+		ft_algo(fdf);
+	}
 	return (0);
 }
 
@@ -180,6 +211,7 @@ static void	ft_init(t_data *fdf)
 	fdf->more = 0;
 	fdf->less = 0;
 	fdf->iter = 50;
+	fdf->lock = 0;
 }
 
 int			main(int argc, char **argv)
@@ -189,12 +221,7 @@ int			main(int argc, char **argv)
 
 	i = 5;
 	(void)argc;
-	if (argv[1][0] == '1')
-		fdf.frac = 1;
-	else
-	{
-		fdf.frac = 2;
-	}
+	fdf.frac = atoi(argv[1]);
 	ft_init(&fdf);
 	fdf.mlx = mlx_init();
 	fdf.win = mlx_new_window(fdf.mlx, SCREEN_X, SCREEN_Y, "prastoin's fdf");
@@ -203,7 +230,7 @@ int			main(int argc, char **argv)
 	ft_algo(&fdf);
 	mlx_key_hook(fdf.win, deal_key, &fdf);
 	mlx_mouse_hook(fdf.win, mouse_hook, &fdf);
-	mlx_hook(fdf.win, MotionNotify, PointerMotionMask, funct, &fdf);
+	mlx_hook(fdf.win, 6, (1L<<6), funct, &fdf);
 	mlx_loop(fdf.mlx);
 	return (0);
 }
