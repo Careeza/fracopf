@@ -6,7 +6,7 @@
 /*   By: prastoin <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/29 13:58:31 by prastoin          #+#    #+#             */
-/*   Updated: 2019/01/14 15:50:27 by fbecerri         ###   ########.fr       */
+/*   Updated: 2019/01/14 16:48:12 by fbecerri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 # include <stddef.h>
 # include <complex.h>
 
+# define NBR_THREADS 4
 # define KEY_LESS 78
 # define KEY_PLUS 69
 # define KEY_UP 125
@@ -73,6 +74,13 @@ typedef struct	s_data
 	double grad;
 	int		iter;
 }				t_data;
+
+typedef struct			s_worker_arg
+{
+	t_data		*frac;
+	int			start_y;
+	int			end_y;
+}						t_worker_arg;
 
 int				get_z_max(t_data *fdf);
 int				parser(t_data *fdf);

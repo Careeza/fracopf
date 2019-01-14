@@ -6,12 +6,13 @@
 /*   By: prastoin <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/06 10:19:44 by prastoin          #+#    #+#             */
-/*   Updated: 2019/01/14 16:00:07 by fbecerri         ###   ########.fr       */
+/*   Updated: 2019/01/14 16:54:14 by fbecerri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 #include "frac.h"
+#include <pthread.h>
 
 static int	ft_div3(t_complex c, int iter)
 {
@@ -56,8 +57,9 @@ static int	ft_div(t_complex c, int iter)
 	return (i);
 }
 
-static int	ft_algo(t_data *frac)
+static void	*ft_algo(t_worker_arg *arg)
 {
+	const	t_data *frac = arg->frac;
 	int			x;
 	int			y;
 	int			res;
@@ -67,7 +69,7 @@ static int	ft_algo(t_data *frac)
 
 	screeny = -(SCREEN_Y / (double)(frac->zoom * 2) + frac->position_y) + frac->ymouse;
 	screenx = -(SCREEN_X / (double)(frac->zoom * 2) + frac->position_x) + frac->xmouse;
-	y = 0;
+	y = arg->start_y;
 	while (y < SCREEN_Y)
 	{
 		x = 0;
@@ -86,6 +88,29 @@ static int	ft_algo(t_data *frac)
 		}
 		y++;
 	}
+	return (NULL);
+}
+
+int			render(t_data *frac)
+{
+	pthread_t		threads[NBR_THREADS];
+	t_worker_arg	args[NBR_THREADS];
+	int				i;
+
+	mlx_clear_window(frac->mlx, frac->win);
+	i = 0;
+	while (i < NBR_THREADS)
+	{
+		args[i] = (t_worker_arg) {
+			.frac = frac,
+			.start_y = i * (SCREEN_Y / NBR_THREADS),
+			.end_y = (i + 1) * (SCREEN_Y / NBR_THREADS)
+		};
+	pthread_create(threads + i, NULL, (void*)ft_algo, args + i);
+	i++;
+	}
+	while (i--)
+		pthread_join(threads[i], NULL);
 	mlx_put_image_to_window(frac->mlx, frac->win, frac->img, 0, 0);
 	return (0);
 }
@@ -111,7 +136,7 @@ static int	deal_key(int key, t_data *frac)
 	mlx_destroy_image(frac->mlx, frac->img);
 	frac->img = mlx_new_image(frac->mlx, SCREEN_X, SCREEN_Y);
 	frac->img_ptr = (int *)mlx_get_data_addr(frac->img, &key, &key, &key);
-	ft_algo(frac);
+	render(frac);
 	return (0);
 }
 
@@ -120,14 +145,14 @@ static int	funct(int x, int y, t_data *frac)
 	if (frac->lock == 0)
 	{
 		frac->julia = x / 200.0  - 2.5 + ((y / 200.0 - 2.5) * I);
-		ft_algo(frac);
+		render(frac);
 	}
 	return (0);
 }
 
 static int	mouse_hook(int button, int x, int y, t_data *frac)
 {
-	if (button == 1)
+	if (button == 4)
 	{
 		frac->xmouse = x/(double)frac->zoom - (SCREEN_X
 		/ (double)(frac->zoom * 2) + frac->position_x) + frac->xmouse;
@@ -138,17 +163,13 @@ static int	mouse_hook(int button, int x, int y, t_data *frac)
 		frac->position_x = 0;
 		frac->zoom = frac->zoom * 2;
 	}
-	if (button == 2)
-		frac->zoom = frac->zoom * 0.5;
-	if (button == 4)
-		frac->position_y += 0.03;
 	if (button == 5)
-		frac->position_y -= 0.03;
+		frac->zoom = frac->zoom * 0.5;
 	if (button == 6)
 		frac->position_x += 0.03;
 	if (button == 7)
 		frac->position_x -= 0.03;
-	ft_algo(frac);
+	render(frac);
 	return (0);
 }
 
@@ -163,7 +184,7 @@ static void	ft_init(t_data *frac)
 	frac->hauteur = 1;
 	frac->more = 0;
 	frac->less = 0;
-	frac->iter = 50;
+	frac->iter = 100;
 	frac->lock = 1;
 }
 
@@ -181,7 +202,7 @@ int			main(int argc, char **argv)
 	frac.win = mlx_new_window(frac.mlx, SCREEN_X, SCREEN_Y, "fbecerri frac");
 	frac.img = mlx_new_image(frac.mlx, SCREEN_X, SCREEN_Y);
 	frac.img_ptr = (int *)mlx_get_data_addr(frac.img, &i, &i, &i);
-	ft_algo(&frac);
+	render(&frac);
 	mlx_key_hook(frac.win, deal_key, &frac);
 	mlx_mouse_hook(frac.win, mouse_hook, &frac);
 	mlx_hook(frac.win, 6, (1L<<6), funct, &frac);

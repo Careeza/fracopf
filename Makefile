@@ -6,7 +6,7 @@
 #    By: prastoin <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/01/07 11:13:09 by prastoin          #+#    #+#              #
-#    Updated: 2019/01/14 14:19:58 by fbecerri         ###   ########.fr        #
+#    Updated: 2019/01/14 16:50:04 by fbecerri         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,7 @@ SRC = main.c
 
 OBJ = $(SRC:.c=.o)
 
-FLAG = -Wall -Wextra -Werror
+FLAG = -Wall -Wextra -Werror -O3
 
 LIB = libft/libft.a
 
