@@ -16,7 +16,7 @@ SRC = main.c
 
 OBJ = $(SRC:.c=.o)
 
-FLAG = -Wall -Wextra -Werror -O3
+FLAG = -Wall -Wextra -Werror -O3 -O2 -O1 -Ofast
 
 LIB = libft/libft.a
 

@@ -67,8 +67,8 @@ static void	*ft_algo(t_worker_arg *arg)
 	double			screeny;
 	double			screenx;
 
-	screeny = -(SCREEN_Y / (double)(frac->zoom * 2) + frac->position_y) + frac->ymouse;
-	screenx = -(SCREEN_X / (double)(frac->zoom * 2) + frac->position_x) + frac->xmouse;
+	screeny = -(SCREEN_Y / (double)(frac->zoom * 2) + frac->position_y) + frac->ymouse / 2;
+	screenx = -(SCREEN_X / (double)(frac->zoom * 2) + frac->position_x) + frac->xmouse / 2;
 	y = arg->start_y;
 	while (y < SCREEN_Y)
 	{
@@ -152,18 +152,17 @@ static int	funct(int x, int y, t_data *frac)
 
 static int	mouse_hook(int button, int x, int y, t_data *frac)
 {
-	if (button == 4)
+	if (button == 4 || button == 1)
 	{
 		frac->xmouse = x/(double)frac->zoom - (SCREEN_X
 		/ (double)(frac->zoom * 2) + frac->position_x) + frac->xmouse;
 		frac->ymouse = y / (double)frac->zoom - (SCREEN_Y
 		/ (double)(frac->zoom * 2) + frac->position_y) + frac->ymouse;
-		printf("x = %f y = %f\n", frac->xmouse, frac->ymouse);
 		frac->position_y = 0;
 		frac->position_x = 0;
 		frac->zoom = frac->zoom * 2;
 	}
-	if (button == 5)
+	if (button == 5 || button == 2)
 		frac->zoom = frac->zoom * 0.5;
 	if (button == 6)
 		frac->position_x += 0.03;

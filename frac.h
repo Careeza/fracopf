@@ -23,8 +23,8 @@
 # include <complex.h>
 
 # define NBR_THREADS 4
-# define KEY_LESS 78
-# define KEY_PLUS 69
+# define KEY_LESS 69
+# define KEY_PLUS 44
 # define KEY_UP 125
 # define KEY_DOWN 126
 # define KEY_LEFT 123
