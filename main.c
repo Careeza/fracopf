@@ -6,7 +6,7 @@
 /*   By: prastoin <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/06 10:19:44 by prastoin          #+#    #+#             */
-/*   Updated: 2019/01/15 14:39:25 by fbecerri         ###   ########.fr       */
+/*   Updated: 2019/01/15 14:45:35 by fbecerri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,9 +86,10 @@ int			main(int argc, char **argv)
 	int		i;
 
 	i = 5;
-	if (argc == 2)
+	if (argc == 2 && (argv[1][0] == '1' || argv[1][0] == '2'
+				|| argv[1][0] == '3'))
 	{
-		frac.frac = atoi(argv[1]);
+		frac.frac = ft_atoi(argv[1]);
 		ft_init(&frac);
 		frac.mlx = mlx_init();
 		frac.win = mlx_new_window(frac.mlx, SCREEN_X, SCREEN_Y, "fractol");
