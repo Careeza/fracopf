@@ -6,7 +6,7 @@
 /*   By: prastoin <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/01/06 10:19:44 by prastoin          #+#    #+#             */
-/*   Updated: 2019/01/15 13:53:41 by ravernhe         ###   ########.fr       */
+/*   Updated: 2019/01/15 14:39:25 by fbecerri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,5 +100,7 @@ int			main(int argc, char **argv)
 		mlx_hook(frac.win, 6, (1L << 6), funct, &frac);
 		mlx_loop(frac.mlx);
 	}
+	else
+		write(2, "usage: ./fractol 1, 2 ou 3 (mandelbrot, julia, leaf)\n", 53);
 	return (0);
 }

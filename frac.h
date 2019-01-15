@@ -6,7 +6,7 @@
 /*   By: prastoin <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/29 13:58:31 by prastoin          #+#    #+#             */
-/*   Updated: 2019/01/15 13:58:11 by ravernhe         ###   ########.fr       */
+/*   Updated: 2019/01/15 14:29:56 by fbecerri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,14 @@
 # include <sys/stat.h>
 # include <fcntl.h>
 # include <stddef.h>
-# include "include/mlx.h"
+# include <mlx.h>
 # include <complex.h>
 # include <pthread.h>
 # include "libft.h"
 
 # define NBR_THREADS 4
-# define KEY_LESS 69
-# define KEY_PLUS 44
+# define KEY_LESS 78
+# define KEY_PLUS 69
 # define KEY_UP 125
 # define KEY_DOWN 126
 # define KEY_LEFT 123
