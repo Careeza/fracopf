@@ -10,52 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
 #include "frac.h"
-#include <pthread.h>
-
-static int	ft_div3(t_complex c, int iter)
-{
-	t_complex	z;
-	int			i;
-
-	i = 0;
-	z = 0;
-	while (i < iter && cabs(z) <= 2)
-	{
-		z = ccos(z / c);
-		i++;
-	}
-	return (i);
-}
-
-static int	ft_div2(t_complex z, int iter, t_complex c)
-{
-	int			i;
-
-	i = 0;
-	while (i < iter && cabs(z) <= 2)
-	{
-		z = z * z + c;
-		i++;
-	}
-	return (i);
-}
-
-static int	ft_div(t_complex c, int iter)
-{
-	t_complex	z;
-	int			i;
-
-	i = 0;
-	z = 0;
-	while (i < iter && cabs(z) <= 2)
-	{
-		z = z * z + c;
-		i++;
-	}
-	return (i);
-}
 
 static void	*ft_algo(t_worker_arg *arg)
 {
@@ -64,18 +19,15 @@ static void	*ft_algo(t_worker_arg *arg)
 	int			y;
 	int			res;
 	t_complex	c;
-	double			screeny;
-	double			screenx;
 
-	screeny = -(SCREEN_Y / (double)(frac->zoom * 2) + frac->position_y) + frac->ymouse / 2;
-	screenx = -(SCREEN_X / (double)(frac->zoom * 2) + frac->position_x) + frac->xmouse / 2;
-	y = arg->start_y;
-	while (y < SCREEN_Y)
+	y = arg->start_y - 1;
+	while (++y < SCREEN_Y)
 	{
-		x = 0;
-		while (x < SCREEN_X)
+		x = -1;
+		while (++x < SCREEN_X)
 		{
-			c = (x/(double)frac->zoom + (screenx)) + ((y / (double)frac->zoom + (screeny)) * I);
+			c = (x/(double)frac->zoom + (frac->screenx))
+			+ ((y / (double)frac->zoom + (frac->screeny)) * I);
 			if (frac->frac == 1)
 				res = (ft_div(c, frac->iter));
 			if (frac->frac == 2)
@@ -84,9 +36,7 @@ static void	*ft_algo(t_worker_arg *arg)
 				res = (ft_div3(c, frac->iter));
 			frac->img_ptr[y * SCREEN_X + x] =
 				((1.5 * res * 0xFFFFFF) / frac->iter);
-			x++;
 		}
-		y++;
 	}
 	return (NULL);
 }
@@ -97,7 +47,10 @@ int			render(t_data *frac)
 	t_worker_arg	args[NBR_THREADS];
 	int				i;
 
-	mlx_clear_window(frac->mlx, frac->win);
+	frac->screeny = -(SCREEN_Y / (double)(frac->zoom * 2) + frac->position_y)
+	+ frac->ymouse / 2;
+	frac->screenx = -(SCREEN_X / (double)(frac->zoom * 2) + frac->position_x)
+	+ frac->xmouse / 2;
 	i = 0;
 	while (i < NBR_THREADS)
 	{
@@ -115,63 +68,6 @@ int			render(t_data *frac)
 	return (0);
 }
 
-static int	deal_key(int key, t_data *frac)
-{
-	if (key == KEY_LESS)
-		frac->zoom -= 25;
-	if (key == KEY_PLUS)
-		frac->iter++;
-	if (key == 49)
-		frac->lock = frac->lock == 0 ? 1 : 0;
-	if (key == KEY_UP)
-		frac->position_y += (20 / frac->zoom);
-	if (key == KEY_DOWN)
-		frac->position_y -= (20 / frac->zoom);
-	if (key == KEY_RIGHT)
-		frac->position_x += (20 / frac->zoom);
-	if (key == KEY_LEFT)
-		frac->position_x -= (20 / frac->zoom);
-	if (key == KEY_SPACE)
-		exit (0);
-	mlx_destroy_image(frac->mlx, frac->img);
-	frac->img = mlx_new_image(frac->mlx, SCREEN_X, SCREEN_Y);
-	frac->img_ptr = (int *)mlx_get_data_addr(frac->img, &key, &key, &key);
-	render(frac);
-	return (0);
-}
-
-static int	funct(int x, int y, t_data *frac)
-{
-	if (frac->lock == 0)
-	{
-		frac->julia = x / 200.0  - 2.5 + ((y / 200.0 - 2.5) * I);
-		render(frac);
-	}
-	return (0);
-}
-
-static int	mouse_hook(int button, int x, int y, t_data *frac)
-{
-	if (button == 4 || button == 1)
-	{
-		frac->xmouse = x/(double)frac->zoom - (SCREEN_X
-		/ (double)(frac->zoom * 2) + frac->position_x) + frac->xmouse;
-		frac->ymouse = y / (double)frac->zoom - (SCREEN_Y
-		/ (double)(frac->zoom * 2) + frac->position_y) + frac->ymouse;
-		frac->position_y = 0;
-		frac->position_x = 0;
-		frac->zoom = frac->zoom * 2;
-	}
-	if (button == 5 || button == 2)
-		frac->zoom = frac->zoom * 0.5;
-	if (button == 6)
-		frac->position_x += 0.03;
-	if (button == 7)
-		frac->position_x -= 0.03;
-	render(frac);
-	return (0);
-}
-
 static void	ft_init(t_data *frac)
 {
 	frac->xmouse = 0;
@@ -180,9 +76,6 @@ static void	ft_init(t_data *frac)
 	frac->julia = 0;
 	frac->position_x = 0;
 	frac->position_y = 0;
-	frac->hauteur = 1;
-	frac->more = 0;
-	frac->less = 0;
 	frac->iter = 100;
 	frac->lock = 1;
 }

@@ -17,10 +17,11 @@
 # include <sys/types.h>
 # include <sys/stat.h>
 # include <fcntl.h>
-# include <stdio.h>
 # include "include/mlx.h"
 # include <stddef.h>
 # include <complex.h>
+# include <pthread.h>
+# include "libft.h"
 
 # define NBR_THREADS 4
 # define KEY_LESS 69
@@ -41,37 +42,20 @@ typedef struct	s_data
 {
 	void	*mlx;
 	void	*win;
-	void	*ximg;
 	void	*img;
 	int		*img_ptr;
-
-	int		dim;
-	char	**tab;
-	int		fd;
-	int		ord;
-	int		ab;
-	int		**z;
-	int		more;
-	int		less;
 
 	double	zoom;
 	double	position_y;
 	double	position_x;
-	int		hauteur;
-	int		isoparr;
 	int		frac;
 	t_complex julia;
 	int			lock;
 
 	double	xmouse;
 	double	ymouse;
-	int i;
-	int x;
-	int y;
-	int xstart;
-	int ystart;
-	int zstart;
-	double grad;
+	double	screenx;
+	double	screeny;
 	int		iter;
 }				t_data;
 
@@ -82,10 +66,15 @@ typedef struct			s_worker_arg
 	int			end_y;
 }						t_worker_arg;
 
-int				get_z_max(t_data *fdf);
-int				parser(t_data *fdf);
-int				data(t_data *fdf);
-int				algo(t_data *fdf, int x, int y);
+int		render(t_data *frac);
+
+int		ft_div3(t_complex c, int iter);
+int		ft_div2(t_complex z, int iter, t_complex c);
+int		ft_div(t_complex c, int iter);
+
+int		deal_key(int key, t_data *frac);
+int		funct(int x, int y, t_data *frac);
+int		mouse_hook(int button, int x, int y, t_data *frac);
 
 #endif
 

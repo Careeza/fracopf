@@ -12,7 +12,7 @@
 
 NAME = frac
 
-SRC = main.c
+SRC = main.c getinfo.c fractol.c
 
 OBJ = $(SRC:.c=.o)
 
